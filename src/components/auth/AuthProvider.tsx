@@ -27,9 +27,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string) => {
     const response = await apiClient.login({ email, password });
     apiClient.setToken(response.token);
-    setUser(response.user);
+    // Some backends may not include the user in the login response
+    const userFromResponse = (response as any)?.user as User | undefined;
+    const userData = userFromResponse ?? await apiClient.getProfile();
+    setUser(userData);
   };
-
   const register = async (name: string, email: string, password: string, passwordConfirmation: string) => {
     const response = await apiClient.register({
       name,
