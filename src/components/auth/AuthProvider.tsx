@@ -53,15 +53,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
-    const token = localStorage.getItem('auth_token');
-    if (token) {
-      apiClient.setToken(token);
-      // Try to get user info to verify token is still valid
-      // This would require implementing a /user endpoint check
+    const initializeAuth = async () => {
+      const token = localStorage.getItem('auth_token');
+      if (token) {
+        apiClient.setToken(token);
+        try {
+          const userData = await apiClient.getProfile();
+          setUser(userData);
+        } catch (error) {
+          // Token is invalid, remove it
+          apiClient.setToken(null);
+          localStorage.removeItem('auth_token');
+        }
+      }
       setIsLoading(false);
-    } else {
-      setIsLoading(false);
-    }
+    };
+
+    initializeAuth();
   }, []);
 
   const value = {
