@@ -54,13 +54,17 @@ export interface RegisterRequest {
 
 export interface CreateEventRequest {
   name: string;
-  type_id?: number;
+  type?: {
+    code: string;
+  };
   activate_at?: string;
 }
 
 export interface UpdateEventRequest {
   name?: string;
-  type_id?: number;
+  type?: {
+    code: string;
+  };
   activate_at?: string;
 }
 

@@ -23,7 +23,7 @@ export const EventForm: React.FC<EventFormProps> = ({
   onSuccess 
 }) => {
   const [name, setName] = useState('');
-  const [typeId, setTypeId] = useState<number | undefined>(undefined);
+  const [typeCode, setTypeCode] = useState<string | undefined>(undefined);
   const [activateDate, setActivateDate] = useState('');
   const [activateTime, setActivateTime] = useState('');
   const [eventTypes, setEventTypes] = useState<EventType[]>([]);
@@ -33,12 +33,12 @@ export const EventForm: React.FC<EventFormProps> = ({
   useEffect(() => {
     if (event) {
       setName(event.name);
-      setTypeId(event.type?.id);
+      setTypeCode(event.type?.code);
       setActivateDate(event.activateDate || '');
       setActivateTime(event.activateTime || '');
     } else {
       setName('');
-      setTypeId(undefined);
+      setTypeCode(undefined);
       setActivateDate('');
       setActivateTime('');
     }
@@ -75,7 +75,7 @@ export const EventForm: React.FC<EventFormProps> = ({
       if (event) {
         const updateData: UpdateEventRequest = {
           name,
-          type_id: typeId,
+          type: typeCode ? { code: typeCode } : undefined,
           activate_at: activateAt,
         };
         await apiClient.updateEvent(event.id, updateData);
@@ -86,7 +86,7 @@ export const EventForm: React.FC<EventFormProps> = ({
       } else {
         const createData: CreateEventRequest = {
           name,
-          type_id: typeId,
+          type: typeCode ? { code: typeCode } : undefined,
           activate_at: activateAt,
         };
         await apiClient.createEvent(createData);
@@ -132,14 +132,14 @@ export const EventForm: React.FC<EventFormProps> = ({
 
           <div className="space-y-2">
             <Label htmlFor="type">Тип события</Label>
-            <Select value={typeId?.toString()} onValueChange={(value) => setTypeId(Number(value))}>
+            <Select value={typeCode} onValueChange={(value) => setTypeCode(value === "none" ? undefined : value)}>
               <SelectTrigger>
                 <SelectValue placeholder="Выберите тип события" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="0">Без типа</SelectItem>
+                <SelectItem value="none">Без типа</SelectItem>
                 {eventTypes.map((type) => (
-                  <SelectItem key={type.id} value={type.id.toString()}>
+                  <SelectItem key={type.id} value={type.code}>
                     {type.name}
                   </SelectItem>
                 ))}
