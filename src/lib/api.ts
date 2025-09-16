@@ -6,6 +6,7 @@ import {
   Goal,
   EventType,
   Profile,
+  User,
   CreateEventRequest,
   UpdateEventRequest,
   CreateGoalRequest,
@@ -62,15 +63,17 @@ class ApiClient {
     });
   }
 
-  async login(data: LoginRequest): Promise<AuthResponse> {
-    return this.request<AuthResponse>('/login', {
+  async login(data: LoginRequest): Promise<{token: string}> {
+    return this.request<{token: string}>('/login', {
       method: 'POST',
       body: JSON.stringify(data),
     });
   }
 
   async logout(): Promise<void> {
-    await this.request<void>('/logout');
+    await this.request<void>('/logout', {
+      method: 'GET',
+    });
     this.setToken(null);
   }
 
@@ -157,8 +160,8 @@ class ApiClient {
   }
 
   // Profile methods
-  async getProfile(): Promise<Profile> {
-    return this.request<Profile>('/profile');
+  async getProfile(): Promise<User> {
+    return this.request<User>('/user');
   }
 
   async updateProfile(data: UpdateProfileRequest): Promise<Profile> {
