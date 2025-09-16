@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User } from '@/types/api';
+import { Profile } from '@/types/api';
 import { apiClient } from '@/lib/api';
 
 interface AuthContextType {
-  user: User | null;
+  user: Profile | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string, passwordConfirmation: string) => Promise<void>;
@@ -21,7 +21,7 @@ export const useAuth = () => {
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const login = async (email: string, password: string) => {
@@ -39,7 +39,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       password_confirmation: passwordConfirmation,
     });
     apiClient.setToken(response.token);
-    setUser(response.user);
+    // Backend returns token, need to fetch profile data separately
+    const userData = await apiClient.getProfile();
+    setUser(userData);
   };
 
   const logout = async () => {

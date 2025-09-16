@@ -160,8 +160,8 @@ class ApiClient {
   }
 
   // Profile methods
-  async getProfile(): Promise<User> {
-    return this.request<User>('/user');
+  async getProfile(): Promise<Profile> {
+    return this.request<Profile>('/profile');
   }
 
   async updateProfile(data: UpdateProfileRequest): Promise<Profile> {
