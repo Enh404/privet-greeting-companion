@@ -8,9 +8,11 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api';
 import { User } from '@/types/api';
+import { useNavigate } from 'react-router-dom';
 
 export const Profile = () => {
-  const { user, login } = useAuth();
+  const { user, isLoading } = useAuth();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
@@ -26,6 +28,12 @@ export const Profile = () => {
       });
     }
   }, [user]);
+
+  useEffect(() => {
+    if (!isLoading && !user) {
+      navigate('/');
+    }
+  }, [isLoading, user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,9 +62,6 @@ export const Profile = () => {
     });
   };
 
-  if (!user) {
-    return null;
-  }
 
   return (
     <div className="min-h-screen bg-background">
