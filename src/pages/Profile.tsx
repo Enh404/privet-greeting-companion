@@ -54,8 +54,6 @@ export const Profile = () => {
         description: "Ваши данные успешно сохранены",
       });
       setIsEditing(false);
-      // Re-login to update user data in context
-      // This is a simple approach, alternatively we could update the user in context directly
     } catch (error) {
       toast({
         title: "Ошибка",
@@ -96,10 +94,6 @@ export const Profile = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4 mb-6">
-              <div>
-                <Label>ID</Label>
-                <Input value={user?.id || ''} disabled />
-              </div>
               <div>
                 <Label>Имя</Label>
                 <Input value={user?.user.name || ''} disabled />
@@ -164,7 +158,15 @@ export const Profile = () => {
                     <Button 
                       type="button" 
                       variant="outline" 
-                      onClick={() => setIsEditing(false)}
+                      onClick={() => {
+                        setIsEditing(false);
+                        setFormData({
+                          birthday: user?.birthday || '',
+                          telegram: user?.telegram || '',
+                          height: user?.height || '',
+                          weight: user?.weight || '',
+                        });
+                      }}
                     >
                       Отмена
                     </Button>
