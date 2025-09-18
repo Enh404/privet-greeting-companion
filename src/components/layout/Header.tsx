@@ -68,7 +68,7 @@ export const Header: React.FC = () => {
         {user && (
           <div className="flex items-center gap-4">
             <span className="text-sm text-muted-foreground hidden sm:block">
-              Привет, {user.name}!
+              Привет, {user.user.name}!
             </span>
             
             <DropdownMenu>
@@ -76,7 +76,7 @@ export const Header: React.FC = () => {
                 <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                   <Avatar className="h-10 w-10">
                     <AvatarFallback className="bg-primary/10 text-primary">
-                      {user.name.charAt(0).toUpperCase()}
+                      {user.user.name.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                 </Button>

@@ -16,28 +16,39 @@ export const Profile = () => {
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
-    name: user?.name || '',
-    email: user?.email || '',
+    birthday: user?.birthday || '',
+    telegram: user?.telegram || '',
+    height: user?.height || '',
+    weight: user?.weight || '',
   });
 
   useEffect(() => {
     if (user) {
       setFormData({
-        name: user.name,
-        email: user.email,
+        birthday: user.birthday || '',
+        telegram: user.telegram || '',
+        height: user.height || '',
+        weight: user.weight || '',
       });
     }
   }, [user]);
 
   useEffect(() => {
-    // Redirect to home page as requested
-    navigate('/', { replace: true });
-  }, [navigate]);
+    if (!isLoading && !user) {
+      navigate('/', { replace: true });
+    }
+  }, [isLoading, user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await apiClient.updateProfile(formData);
+      const submitData = {
+        birthday: formData.birthday || undefined,
+        telegram: formData.telegram || undefined,
+        height: formData.height ? Number(formData.height) : undefined,
+        weight: formData.weight ? Number(formData.weight) : undefined,
+      };
+      await apiClient.updateProfile(submitData);
       toast({
         title: "Профиль обновлен",
         description: "Ваши данные успешно сохранены",
@@ -55,9 +66,10 @@ export const Profile = () => {
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.type === 'number' ? (e.target.value ? Number(e.target.value) : '') : e.target.value;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [e.target.name]: value,
     });
   };
 
@@ -83,26 +95,66 @@ export const Profile = () => {
             <CardTitle>Профиль пользователя</CardTitle>
           </CardHeader>
           <CardContent>
+            <div className="space-y-4 mb-6">
+              <div>
+                <Label>ID</Label>
+                <Input value={user?.id || ''} disabled />
+              </div>
+              <div>
+                <Label>Имя</Label>
+                <Input value={user?.user.name || ''} disabled />
+              </div>
+              <div>
+                <Label>Email</Label>
+                <Input value={user?.user.email || ''} disabled />
+              </div>
+            </div>
+            
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="name">Имя</Label>
+                <Label htmlFor="birthday">День рождения</Label>
                 <Input
-                  id="name"
-                  name="name"
-                  value={formData.name}
+                  id="birthday"
+                  name="birthday"
+                  type="date"
+                  value={formData.birthday}
                   onChange={handleInputChange}
                   disabled={!isEditing}
                 />
               </div>
               <div>
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="telegram">Telegram</Label>
                 <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  value={formData.email}
+                  id="telegram"
+                  name="telegram"
+                  value={formData.telegram}
                   onChange={handleInputChange}
                   disabled={!isEditing}
+                  placeholder="@username"
+                />
+              </div>
+              <div>
+                <Label htmlFor="height">Рост (см)</Label>
+                <Input
+                  id="height"
+                  name="height"
+                  type="number"
+                  value={formData.height}
+                  onChange={handleInputChange}
+                  disabled={!isEditing}
+                  placeholder="180"
+                />
+              </div>
+              <div>
+                <Label htmlFor="weight">Вес (кг)</Label>
+                <Input
+                  id="weight"
+                  name="weight"
+                  type="number"
+                  value={formData.weight}
+                  onChange={handleInputChange}
+                  disabled={!isEditing}
+                  placeholder="70"
                 />
               </div>
               <div className="flex gap-2">

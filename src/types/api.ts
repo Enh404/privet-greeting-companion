@@ -29,10 +29,15 @@ export interface Goal {
 
 export interface Profile {
   id: number;
-  name: string;
-  email: string;
-  bio?: string;
-  avatar?: string;
+  birthday: string | null;
+  telegram: string | null;
+  height: number | null;
+  weight: number | null;
+  user: {
+    id: number;
+    name: string;
+    email: string;
+  };
 }
 
 export interface AuthResponse {
@@ -77,7 +82,8 @@ export interface UpdateGoalRequest {
 }
 
 export interface UpdateProfileRequest {
-  name?: string;
-  bio?: string;
-  avatar?: string;
+  birthday?: string;
+  telegram?: string;
+  height?: number;
+  weight?: number;
 }
