@@ -30,10 +30,9 @@ export const Profile = () => {
   }, [user]);
 
   useEffect(() => {
-    if (!isLoading && !user) {
-      navigate('/');
-    }
-  }, [isLoading, user, navigate]);
+    // Redirect to home page as requested
+    navigate('/', { replace: true });
+  }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
