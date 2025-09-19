@@ -104,6 +104,17 @@ export const Profile = () => {
               </div>
             </div>
             
+            {!isEditing && (
+              <div className="mb-6">
+                <Button 
+                  type="button" 
+                  onClick={() => setIsEditing(true)}
+                >
+                  Редактировать
+                </Button>
+              </div>
+            )}
+            
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <Label htmlFor="birthday">День рождения</Label>
@@ -152,7 +163,7 @@ export const Profile = () => {
                 />
               </div>
               <div className="flex gap-2">
-                {isEditing ? (
+                {isEditing && (
                   <>
                     <Button type="submit">Сохранить</Button>
                     <Button 
@@ -171,13 +182,6 @@ export const Profile = () => {
                       Отмена
                     </Button>
                   </>
-                ) : (
-                  <Button 
-                    type="button" 
-                    onClick={() => setIsEditing(true)}
-                  >
-                    Редактировать
-                  </Button>
                 )}
               </div>
             </form>
