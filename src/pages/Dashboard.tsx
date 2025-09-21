@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Event, Goal } from '@/types/api';
+import { Event, Goal, EventType } from '@/types/api';
 import { Header } from '@/components/layout/Header';
 import { EventCard } from '@/components/events/EventCard';
 import { GoalCard } from '@/components/goals/GoalCard';
@@ -7,6 +7,7 @@ import { EventForm } from '@/components/events/EventForm';
 import { GoalForm } from '@/components/goals/GoalForm';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Calendar, Target } from 'lucide-react';
 import { apiClient } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
@@ -14,6 +15,8 @@ import { useToast } from '@/hooks/use-toast';
 export const Dashboard: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [goals, setGoals] = useState<Goal[]>([]);
+  const [eventTypes, setEventTypes] = useState<EventType[]>([]);
+  const [selectedEventType, setSelectedEventType] = useState<string>('all');
   const [selectedEvent, setSelectedEvent] = useState<Event | undefined>();
   const [selectedGoal, setSelectedGoal] = useState<Goal | undefined>();
   const [eventFormOpen, setEventFormOpen] = useState(false);
@@ -23,12 +26,30 @@ export const Dashboard: React.FC = () => {
 
   const fetchEvents = async () => {
     try {
-      const data = await apiClient.getEvents();
+      let data;
+      if (selectedEventType === 'all') {
+        data = await apiClient.getEvents();
+      } else {
+        data = await apiClient.getEventsByType(selectedEventType);
+      }
       setEvents(data);
     } catch (error) {
       toast({
         title: 'Ошибка',
         description: 'Не удалось загрузить события',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const fetchEventTypes = async () => {
+    try {
+      const data = await apiClient.getEventTypes();
+      setEventTypes(data);
+    } catch (error) {
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось загрузить типы событий',
         variant: 'destructive',
       });
     }
@@ -50,7 +71,12 @@ export const Dashboard: React.FC = () => {
   useEffect(() => {
     fetchEvents();
     fetchGoals();
+    fetchEventTypes();
   }, []);
+
+  useEffect(() => {
+    fetchEvents();
+  }, [selectedEventType]);
 
   const handleEventToggleStatus = async (id: number) => {
     try {
@@ -157,10 +183,25 @@ export const Dashboard: React.FC = () => {
           <TabsContent value="events" className="space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="text-xl font-semibold">Мои события</h3>
-              <Button onClick={() => openEventForm()} className="flex items-center gap-2">
-                <Plus className="h-4 w-4" />
-                Добавить событие
-              </Button>
+              <div className="flex items-center gap-3">
+                <Select value={selectedEventType} onValueChange={setSelectedEventType}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue placeholder="Все типы" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Все типы</SelectItem>
+                    {eventTypes.map((type) => (
+                      <SelectItem key={type.id} value={type.code}>
+                        {type.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button onClick={() => openEventForm()} className="flex items-center gap-2">
+                  <Plus className="h-4 w-4" />
+                  Добавить событие
+                </Button>
+              </div>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

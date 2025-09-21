@@ -2,18 +2,26 @@ import React, { useState, useEffect } from 'react';
 import { Header } from '@/components/layout/Header';
 import { EventCard } from '@/components/events/EventCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api';
-import { Event } from '@/types/api';
+import { Event, EventType } from '@/types/api';
 
 export const CompletedEvents = () => {
   const [events, setEvents] = useState<Event[]>([]);
+  const [eventTypes, setEventTypes] = useState<EventType[]>([]);
+  const [selectedEventType, setSelectedEventType] = useState<string>('all');
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
   const fetchCompletedEvents = async () => {
     try {
-      const data = await apiClient.getCompletedEvents();
+      let data;
+      if (selectedEventType === 'all') {
+        data = await apiClient.getCompletedEvents();
+      } else {
+        data = await apiClient.getCompletedEventsByType(selectedEventType);
+      }
       setEvents(data);
     } catch (error) {
       toast({
@@ -26,9 +34,28 @@ export const CompletedEvents = () => {
     }
   };
 
+  const fetchEventTypes = async () => {
+    try {
+      const data = await apiClient.getEventTypes();
+      setEventTypes(data);
+    } catch (error) {
+      toast({
+        title: "Ошибка",
+        description: "Не удалось загрузить типы событий",
+        variant: "destructive",
+      });
+    }
+  };
+
   useEffect(() => {
     fetchCompletedEvents();
+    fetchEventTypes();
   }, []);
+
+  useEffect(() => {
+    setIsLoading(true);
+    fetchCompletedEvents();
+  }, [selectedEventType]);
 
   const handleToggleStatus = async (id: number) => {
     try {
@@ -91,9 +118,24 @@ export const CompletedEvents = () => {
       <main className="container mx-auto px-4 py-8">
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              Выполненные события
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                Выполненные события
+              </CardTitle>
+              <Select value={selectedEventType} onValueChange={setSelectedEventType}>
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Все типы" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Все типы</SelectItem>
+                  {eventTypes.map((type) => (
+                    <SelectItem key={type.id} value={type.code}>
+                      {type.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </CardHeader>
           <CardContent>
             {events.length === 0 ? (

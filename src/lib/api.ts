@@ -122,6 +122,10 @@ class ApiClient {
     return this.request<Event[]>(`/event/${typeCode}`);
   }
 
+  async getCompletedEventsByType(typeCode: string): Promise<Event[]> {
+    return this.request<Event[]>(`/event/${typeCode}/completed`);
+  }
+
   // Goal methods
   async getGoals(): Promise<Goal[]> {
     return this.request<Goal[]>('/goal');
