@@ -3,6 +3,8 @@ import { Header } from '@/components/layout/Header';
 import { EventCard } from '@/components/events/EventCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Calendar } from '@/components/ui/calendar';
+import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { apiClient } from '@/lib/api';
 import { Event, EventType } from '@/types/api';
@@ -11,16 +13,19 @@ export const CompletedEvents = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [eventTypes, setEventTypes] = useState<EventType[]>([]);
   const [selectedEventType, setSelectedEventType] = useState<string>('all');
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
   const fetchCompletedEvents = async () => {
     try {
       let data;
+      const dateParam = selectedDate ? selectedDate.toISOString().split('T')[0] : undefined;
+      
       if (selectedEventType === 'all') {
-        data = await apiClient.getCompletedEvents();
+        data = await apiClient.getCompletedEvents(dateParam);
       } else {
-        data = await apiClient.getCompletedEventsByType(selectedEventType);
+        data = await apiClient.getCompletedEventsByType(selectedEventType, dateParam);
       }
       setEvents(data);
     } catch (error) {
@@ -55,7 +60,7 @@ export const CompletedEvents = () => {
   useEffect(() => {
     setIsLoading(true);
     fetchCompletedEvents();
-  }, [selectedEventType]);
+  }, [selectedEventType, selectedDate]);
 
   const handleToggleStatus = async (id: number) => {
     try {
@@ -116,27 +121,52 @@ export const CompletedEvents = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <main className="container mx-auto px-4 py-8">
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                Выполненные события
-              </CardTitle>
-              <Select value={selectedEventType} onValueChange={setSelectedEventType}>
-                <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Все типы" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Все типы</SelectItem>
-                  {eventTypes.map((type) => (
-                    <SelectItem key={type.id} value={type.code}>
-                      {type.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </CardHeader>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <Card className="lg:col-span-1">
+            <CardHeader>
+              <CardTitle className="text-sm">Фильтр по дате</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={setSelectedDate}
+                className="rounded-md border"
+              />
+              {selectedDate && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setSelectedDate(undefined)}
+                  className="w-full mt-2"
+                >
+                  Сбросить дату
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+          
+          <Card className="lg:col-span-3">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  Выполненные события
+                </CardTitle>
+                <Select value={selectedEventType} onValueChange={setSelectedEventType}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue placeholder="Все типы" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Все типы</SelectItem>
+                    {eventTypes.map((type) => (
+                      <SelectItem key={type.id} value={type.code}>
+                        {type.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardHeader>
           <CardContent>
             {events.length === 0 ? (
               <p className="text-muted-foreground text-center py-8">
@@ -156,7 +186,8 @@ export const CompletedEvents = () => {
               </div>
             )}
           </CardContent>
-        </Card>
+          </Card>
+        </div>
       </main>
     </div>
   );

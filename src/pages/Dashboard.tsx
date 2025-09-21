@@ -8,7 +8,9 @@ import { GoalForm } from '@/components/goals/GoalForm';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Calendar, Target } from 'lucide-react';
+import { Calendar } from '@/components/ui/calendar';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Plus, Calendar as CalendarIcon, Target } from 'lucide-react';
 import { apiClient } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 
@@ -17,6 +19,7 @@ export const Dashboard: React.FC = () => {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [eventTypes, setEventTypes] = useState<EventType[]>([]);
   const [selectedEventType, setSelectedEventType] = useState<string>('all');
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedEvent, setSelectedEvent] = useState<Event | undefined>();
   const [selectedGoal, setSelectedGoal] = useState<Goal | undefined>();
   const [eventFormOpen, setEventFormOpen] = useState(false);
@@ -27,10 +30,12 @@ export const Dashboard: React.FC = () => {
   const fetchEvents = async () => {
     try {
       let data;
+      const dateParam = selectedDate ? selectedDate.toISOString().split('T')[0] : undefined;
+      
       if (selectedEventType === 'all') {
-        data = await apiClient.getEvents();
+        data = await apiClient.getEvents(dateParam);
       } else {
-        data = await apiClient.getEventsByType(selectedEventType);
+        data = await apiClient.getEventsByType(selectedEventType, dateParam);
       }
       setEvents(data);
     } catch (error) {
@@ -76,7 +81,7 @@ export const Dashboard: React.FC = () => {
 
   useEffect(() => {
     fetchEvents();
-  }, [selectedEventType]);
+  }, [selectedEventType, selectedDate]);
 
   const handleEventToggleStatus = async (id: number) => {
     try {
@@ -168,17 +173,43 @@ export const Dashboard: React.FC = () => {
           </p>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="events" className="flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              События
-            </TabsTrigger>
-            <TabsTrigger value="goals" className="flex items-center gap-2">
-              <Target className="h-4 w-4" />
-              Цели
-            </TabsTrigger>
-          </TabsList>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
+          <Card className="lg:col-span-1">
+            <CardHeader>
+              <CardTitle className="text-sm">Фильтр по дате</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={setSelectedDate}
+                className="rounded-md border"
+              />
+              {selectedDate && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setSelectedDate(undefined)}
+                  className="w-full mt-2"
+                >
+                  Сбросить дату
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+          
+          <div className="lg:col-span-3">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="events" className="flex items-center gap-2">
+                  <CalendarIcon className="h-4 w-4" />
+                  События
+                </TabsTrigger>
+                <TabsTrigger value="goals" className="flex items-center gap-2">
+                  <Target className="h-4 w-4" />
+                  Цели
+                </TabsTrigger>
+              </TabsList>
 
           <TabsContent value="events" className="space-y-4">
             <div className="flex justify-between items-center">
@@ -218,7 +249,7 @@ export const Dashboard: React.FC = () => {
 
             {events.length === 0 && (
               <div className="text-center py-12">
-                <Calendar className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <CalendarIcon className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                 <p className="text-muted-foreground">Пока нет событий</p>
               </div>
             )}
@@ -253,6 +284,8 @@ export const Dashboard: React.FC = () => {
             )}
           </TabsContent>
         </Tabs>
+          </div>
+        </div>
       </main>
 
       <EventForm

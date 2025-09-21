@@ -78,12 +78,14 @@ class ApiClient {
   }
 
   // Event methods
-  async getEvents(): Promise<Event[]> {
-    return this.request<Event[]>('/event');
+  async getEvents(date?: string): Promise<Event[]> {
+    const url = date ? `/event?date=${date}` : '/event';
+    return this.request<Event[]>(url);
   }
 
-  async getCompletedEvents(): Promise<Event[]> {
-    return this.request<Event[]>('/event/completed');
+  async getCompletedEvents(date?: string): Promise<Event[]> {
+    const url = date ? `/event/completed?date=${date}` : '/event/completed';
+    return this.request<Event[]>(url);
   }
 
   async getEventById(id: number): Promise<Event> {
@@ -118,12 +120,14 @@ class ApiClient {
     return this.request<EventType[]>('/event/types');
   }
 
-  async getEventsByType(typeCode: string): Promise<Event[]> {
-    return this.request<Event[]>(`/event/${typeCode}`);
+  async getEventsByType(typeCode: string, date?: string): Promise<Event[]> {
+    const url = date ? `/event/${typeCode}?date=${date}` : `/event/${typeCode}`;
+    return this.request<Event[]>(url);
   }
 
-  async getCompletedEventsByType(typeCode: string): Promise<Event[]> {
-    return this.request<Event[]>(`/event/${typeCode}/completed`);
+  async getCompletedEventsByType(typeCode: string, date?: string): Promise<Event[]> {
+    const url = date ? `/event/${typeCode}/completed?date=${date}` : `/event/${typeCode}/completed`;
+    return this.request<Event[]>(url);
   }
 
   // Goal methods
