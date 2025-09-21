@@ -30,7 +30,9 @@ export const Dashboard: React.FC = () => {
   const fetchEvents = async () => {
     try {
       let data;
-      const dateParam = selectedDate ? selectedDate.toISOString().split('T')[0] : undefined;
+      const dateParam = selectedDate ? 
+        `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}` 
+        : undefined;
       
       if (selectedEventType === 'all') {
         data = await apiClient.getEvents(dateParam);
